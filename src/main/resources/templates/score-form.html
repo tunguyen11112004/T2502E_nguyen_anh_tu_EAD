@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${editMode ? 'Edit Score - Student Information System' : 'Add Score (+ Score) - Student Information System'}">Score Form</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sis: {
+                            50: '#f4f7f3',
+                            100: '#e4ebe2',
+                            500: '#5a7753',
+                            600: '#4a6444',
+                            700: '#3c5137'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 antialiased flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-sis-500 text-white shadow-md">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 py-5 flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold">Student Information System</h1>
+                <p class="text-sis-100 text-sm"
+                   th:text="${editMode ? 'Chỉnh sửa điểm môn học cho sinh viên' : 'Question 2 — Insert Score of Subject for Student (+ Score)'}">
+                </p>
+            </div>
+            <a th:href="@{/}" class="px-3.5 py-2 rounded-lg bg-sis-600 hover:bg-sis-700 text-sm font-medium transition">
+                &larr; Quay lại Danh sách
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Form Card -->
+    <main class="flex-1 max-w-xl w-full mx-auto px-4 sm:px-6 py-10">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="bg-sis-500 px-6 py-4 text-white">
+                <h2 class="text-lg font-bold"
+                    th:text="${editMode ? 'Cập nhật Điểm Môn học' : 'Nhập Điểm Môn học (+ Score)'}">Nhập Điểm</h2>
+                <p class="text-xs text-sis-100 mt-0.5">Lưu điểm thành phần vào bảng <code>student_score_t</code> và tự động quy đổi Grade</p>
+            </div>
+
+            <form th:action="${editMode ? '/scores/' + scoreForm.studentScoreId : '/scores'}"
+                  th:object="${scoreForm}"
+                  method="post"
+                  class="p-6 space-y-5">
+
+                <input type="hidden" th:field="*{studentScoreId}"/>
+
+                <!-- Select Student -->
+                <div>
+                    <label for="studentId" class="block text-sm font-semibold text-slate-700 mb-1">
+                        Student (Sinh viên) <span class="text-rose-500">*</span>
+                    </label>
+                    <select id="studentId"
+                            th:field="*{studentId}"
+                            class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-sis-500 focus:border-sis-500">
+                        <option value="">-- Chọn sinh viên --</option>
+                        <option th:each="st : ${students}"
+                                th:value="${st.studentId}"
+                                th:text="${st.studentCode + ' - ' + st.fullName}">
+                        </option>
+                    </select>
+                    <p th:if="${#fields.hasErrors('studentId')}"
+                       th:errors="*{studentId}"
+                       class="mt-1 text-xs text-rose-600 font-medium"></p>
+                </div>
+
+                <!-- Select Subject -->
+                <div>
+                    <label for="subjectId" class="block text-sm font-semibold text-slate-700 mb-1">
+                        Subject (Môn học) <span class="text-rose-500">*</span>
+                    </label>
+                    <select id="subjectId"
+                            th:field="*{subjectId}"
+                            class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-sis-500 focus:border-sis-500">
+                        <option value="">-- Chọn môn học --</option>
+                        <option th:each="sub : ${subjects}"
+                                th:value="${sub.subjectId}"
+                                th:text="${sub.subjectCode + ' - ' + sub.subjectName + ' (' + sub.credit + ' credits)'}">
+                        </option>
+                    </select>
+                    <p th:if="${#fields.hasErrors('subjectId')}"
+                       th:errors="*{subjectId}"
+                       class="mt-1 text-xs text-rose-600 font-medium"></p>
+                </div>
+
+                <!-- Score 1 & Score 2 -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="score1" class="block text-sm font-semibold text-slate-700 mb-1">
+                            Score 1 (Hệ số 0.3) <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="number"
+                               step="0.01"
+                               min="0"
+                               max="10"
+                               id="score1"
+                               th:field="*{score1}"
+                               oninput="updateLiveGradePreview()"
+                               placeholder="0.0 - 10.0"
+                               class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-sis-500 focus:border-sis-500"/>
+                        <p th:if="${#fields.hasErrors('score1')}"
+                           th:errors="*{score1}"
+                           class="mt-1 text-xs text-rose-600 font-medium"></p>
+                    </div>
+
+                    <div>
+                        <label for="score2" class="block text-sm font-semibold text-slate-700 mb-1">
+                            Score 2 (Hệ số 0.7) <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="number"
+                               step="0.01"
+                               min="0"
+                               max="10"
+                               id="score2"
+                               th:field="*{score2}"
+                               oninput="updateLiveGradePreview()"
+                               placeholder="0.0 - 10.0"
+                               class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-sis-500 focus:border-sis-500"/>
+                        <p th:if="${#fields.hasErrors('score2')}"
+                           th:errors="*{score2}"
+                           class="mt-1 text-xs text-rose-600 font-medium"></p>
+                    </div>
+                </div>
+
+                <!-- Live Calculated Grade Preview -->
+                <div class="rounded-xl bg-sis-50 border border-sis-100 p-4 flex items-center justify-between">
+                    <div class="text-xs text-slate-600">
+                        <p class="font-semibold text-slate-800">Dự tính Điểm tổng kết & Xếp loại (Live Preview)</p>
+                        <p class="mt-0.5">Công thức: <code>0.3 × Score 1 + 0.7 × Score 2</code></p>
+                    </div>
+                    <div class="text-right">
+                        <span id="liveCombinedScore" class="text-sm font-mono font-semibold text-slate-700 mr-2">--</span>
+                        <span id="liveGradeBadge" class="inline-flex items-center justify-center px-3 py-1 rounded-md bg-slate-200 text-slate-700 font-bold text-sm">
+                            -
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="pt-3 flex items-center justify-end gap-3 border-t border-slate-100">
+                    <a th:href="@{/}"
+                       class="px-4 py-2.5 rounded-lg border border-slate-300 hover:bg-slate-100 text-slate-700 text-sm font-medium transition">
+                        Hủy bỏ
+                    </a>
+                    <button type="submit"
+                            class="px-5 py-2.5 rounded-lg bg-sis-500 hover:bg-sis-600 text-white text-sm font-semibold shadow-sm transition"
+                            th:text="${editMode ? 'Cập nhật Điểm' : 'Lưu Điểm (+ Score)'}">
+                        Lưu Điểm
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        function updateLiveGradePreview() {
+            const s1Input = document.getElementById('score1').value;
+            const s2Input = document.getElementById('score2').value;
+            const combinedEl = document.getElementById('liveCombinedScore');
+            const badgeEl = document.getElementById('liveGradeBadge');
+
+            if (s1Input === '' || s2Input === '') {
+                combinedEl.textContent = '--';
+                badgeEl.textContent = '-';
+                badgeEl.className = 'inline-flex items-center justify-center px-3 py-1 rounded-md bg-slate-200 text-slate-700 font-bold text-sm';
+                return;
+            }
+
+            const s1 = parseFloat(s1Input);
+            const s2 = parseFloat(s2Input);
+            if (isNaN(s1) || isNaN(s2)) {
+                return;
+            }
+
+            const combined = Math.round((0.3 * s1 + 0.7 * s2) * 100) / 100;
+            combinedEl.textContent = combined.toFixed(2) + ' pts';
+
+            let grade = 'F';
+            let badgeClass = 'bg-rose-100 text-rose-800 border border-rose-200';
+            if (combined >= 8.0) {
+                grade = 'A';
+                badgeClass = 'bg-emerald-100 text-emerald-800 border border-emerald-200';
+            } else if (combined >= 6.0) {
+                grade = 'B';
+                badgeClass = 'bg-blue-100 text-blue-800 border border-blue-200';
+            } else if (combined >= 4.0) {
+                grade = 'D';
+                badgeClass = 'bg-amber-100 text-amber-800 border border-amber-200';
+            }
+            badgeEl.textContent = 'Grade ' + grade;
+            badgeEl.className = 'inline-flex items-center justify-center px-3 py-1 rounded-md font-bold text-sm ' + badgeClass;
+        }
+        document.addEventListener('DOMContentLoaded', updateLiveGradePreview);
+    </script>
+</body>
+</html>
+

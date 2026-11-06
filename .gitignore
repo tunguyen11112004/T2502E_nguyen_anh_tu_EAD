@@ -1,0 +1,53 @@
+# Compiled class file & Maven build output
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+replay_pid*
+
+# CodeGraph & AI local index / outputs
+.codegraph/
+repomix-output.xml
+.ai/outputs/*
+!.ai/outputs/.gitkeep
+
+# Environment variables & Secrets (Mandatory Safety Rule)
+.env
+.env.*
+!.env.example
+
+# IDEs & Editors
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+.settings/
+.project
+.classpath
+.factorypath
+.springBeans
+.sts4-cache
+nbbuild/
+nbproject/
+nbactions.xml
+nb-configuration.xml
+
+# Node / Frontend tooling (if any local Tailwind CLI used)
+node_modules/
+dist/
+build/
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Logs & OS temporary files
+*.log
+logs/
+.DS_Store
+Thumbs.db
+desktop.ini
+

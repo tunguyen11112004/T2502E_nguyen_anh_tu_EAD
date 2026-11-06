@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Information System (SIS) - Hanoi University of Science and Technology</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sis: {
+                            50: '#f4f7f3',
+                            100: '#e4ebe2',
+                            500: '#5a7753',
+                            600: '#4a6444',
+                            700: '#3c5137',
+                            800: '#31422d'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 antialiased flex flex-col">
+
+    <!-- Header Banner matching Exam Paper style with Tailwind polish -->
+    <header class="bg-sis-500 text-white shadow-md border-b border-sis-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Student Information System</h1>
+                <p class="text-sis-100 text-sm mt-0.5">Hanoi University of Science and Technology — Training Department Portal</p>
+            </div>
+            <div class="flex items-center gap-2 text-xs sm:text-sm bg-sis-600/80 px-3.5 py-2 rounded-lg border border-white/15">
+                <span class="font-medium">Formula:</span>
+                <code class="bg-black/20 px-2 py-0.5 rounded text-emerald-100">Grade = 0.3 × Score 1 + 0.7 × Score 2</code>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+        <!-- Flash Notification Messages -->
+        <div th:if="${successMessage}" class="rounded-xl bg-emerald-50 border border-emerald-200 p-4 flex items-center justify-between text-emerald-800 shadow-sm">
+            <div class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span class="font-medium text-sm" th:text="${successMessage}">Success</span>
+            </div>
+        </div>
+
+        <div th:if="${errorMessage}" class="rounded-xl bg-rose-50 border border-rose-200 p-4 flex items-center justify-between text-rose-800 shadow-sm">
+            <div class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span class="font-medium text-sm" th:text="${errorMessage}">Error</span>
+            </div>
+        </div>
+
+        <!-- Section Title as in Exam Mockup -->
+        <div class="text-center">
+            <h2 class="text-2xl sm:text-3xl font-bold text-sis-600 tracking-tight">Student Information</h2>
+            <p class="text-sm text-slate-500 mt-1">Manage student profiles, subject scores, credits, and converted letter grades</p>
+        </div>
+
+        <!-- Quick KPI Summary Cards -->
+        <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Students</p>
+                    <p class="text-2xl font-bold text-slate-800 mt-1" th:text="${#lists.size(students)}">1</p>
+                </div>
+                <div class="w-10 h-10 rounded-lg bg-sis-50 text-sis-600 flex items-center justify-center font-bold">
+                    SV
+                </div>
+            </div>
+            <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Subjects</p>
+                    <p class="text-2xl font-bold text-slate-800 mt-1" th:text="${#lists.size(subjects)}">3</p>
+                </div>
+                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+                    MH
+                </div>
+            </div>
+            <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Score Records</p>
+                    <p class="text-2xl font-bold text-slate-800 mt-1" th:text="${#lists.size(scores)}">1</p>
+                </div>
+                <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+                    KQ
+                </div>
+            </div>
+            <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+                <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Grade Breakdown</p>
+                <div class="flex items-center gap-2 mt-2 text-xs font-semibold">
+                    <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">A: <span th:text="${countGradeA}">0</span></span>
+                    <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800">B: <span th:text="${countGradeB}">0</span></span>
+                    <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800">D: <span th:text="${countGradeD}">0</span></span>
+                    <span class="px-2 py-0.5 rounded bg-rose-100 text-rose-800">F: <span th:text="${countGradeF}">0</span></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Action Buttons (+ Student, + Score) & Filter Bar -->
+        <section class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <a th:href="@{/students/new}"
+                   class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-sis-500 hover:bg-sis-600 text-white font-semibold text-sm shadow-sm transition duration-150">
+                    + Student
+                </a>
+                <a th:href="@{/scores/new}"
+                   class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-sis-500 hover:bg-sis-600 text-white font-semibold text-sm shadow-sm transition duration-150">
+                    + Score
+                </a>
+            </div>
+
+            <form th:action="@{/}" method="get" class="flex flex-wrap items-center gap-2">
+                <input type="text"
+                       name="keyword"
+                       th:value="${keyword}"
+                       placeholder="Tìm mã SV, họ tên, môn học..."
+                       class="px-3.5 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-sis-500 focus:border-sis-500 bg-white w-60 sm:w-64"/>
+                <select name="grade"
+                        class="px-3 py-2 rounded-lg border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-sis-500">
+                    <option value="ALL" th:selected="${selectedGrade == 'ALL'}">All Grades</option>
+                    <option value="A" th:selected="${selectedGrade == 'A'}">Grade A (8.0 - 10)</option>
+                    <option value="B" th:selected="${selectedGrade == 'B'}">Grade B (6.0 - 7.9)</option>
+                    <option value="D" th:selected="${selectedGrade == 'D'}">Grade D (4.0 - 5.9)</option>
+                    <option value="F" th:selected="${selectedGrade == 'F'}">Grade F (&lt; 4.0)</option>
+                </select>
+                <button type="submit"
+                        class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-sm font-medium transition">
+                    Lọc
+                </button>
+                <a th:if="${!#strings.isEmpty(keyword) or selectedGrade != 'ALL'}"
+                   th:href="@{/}"
+                   class="px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-100 text-slate-600 text-sm transition">
+                    Xóa lọc
+                </a>
+            </form>
+        </section>
+
+        <!-- Main Student Information Table (Exact Columns as Exam Paper) -->
+        <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200 text-sm">
+                    <thead class="bg-sis-500 text-white">
+                        <tr>
+                            <th scope="col" class="px-4 py-3.5 text-left font-semibold">Id</th>
+                            <th scope="col" class="px-4 py-3.5 text-left font-semibold">Student Id</th>
+                            <th scope="col" class="px-4 py-3.5 text-left font-semibold">Student Name</th>
+                            <th scope="col" class="px-4 py-3.5 text-left font-semibold">Subject Name</th>
+                            <th scope="col" class="px-4 py-3.5 text-right font-semibold">Score 1</th>
+                            <th scope="col" class="px-4 py-3.5 text-right font-semibold">Score 2</th>
+                            <th scope="col" class="px-4 py-3.5 text-center font-semibold">Credit</th>
+                            <th scope="col" class="px-4 py-3.5 text-center font-semibold">Grade</th>
+                            <th scope="col" class="px-4 py-3.5 text-center font-semibold w-16">Edit</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 bg-white">
+                        <tr th:each="item, stat : ${scores}" class="hover:bg-sis-50/60 transition">
+                            <td class="px-4 py-3.5 font-medium text-slate-600" th:text="${stat.count}">1</td>
+                            <td class="px-4 py-3.5 font-semibold text-slate-800" th:text="${item.student.studentCode}">2007A10</td>
+                            <td class="px-4 py-3.5 text-slate-800" th:text="${item.student.fullName}">Nguyễn Văn A</td>
+                            <td class="px-4 py-3.5">
+                                <span class="font-medium text-slate-800" th:text="${item.subject.subjectCode}">JAVA</span>
+                                <span class="text-xs text-slate-400 ml-1" th:text="'(' + ${item.subject.subjectName} + ')'"></span>
+                            </td>
+                            <td class="px-4 py-3.5 text-right font-mono text-slate-700" th:text="${#numbers.formatDecimal(item.score1, 1, 1)}">8.5</td>
+                            <td class="px-4 py-3.5 text-right font-mono text-slate-700" th:text="${#numbers.formatDecimal(item.score2, 1, 1)}">7.0</td>
+                            <td class="px-4 py-3.5 text-center font-medium text-slate-700" th:text="${item.subject.credit}">4</td>
+                            <td class="px-4 py-3.5 text-center">
+                                <span th:switch="${item.grade}" th:title="'Combined Score: ' + ${item.combinedScore}">
+                                    <span th:case="'A'" class="inline-flex items-center justify-center w-8 h-7 rounded-md bg-emerald-100 text-emerald-800 font-bold text-xs border border-emerald-200">A</span>
+                                    <span th:case="'B'" class="inline-flex items-center justify-center w-8 h-7 rounded-md bg-blue-100 text-blue-800 font-bold text-xs border border-blue-200">B</span>
+                                    <span th:case="'D'" class="inline-flex items-center justify-center w-8 h-7 rounded-md bg-amber-100 text-amber-800 font-bold text-xs border border-amber-200">D</span>
+                                    <span th:case="*" class="inline-flex items-center justify-center w-8 h-7 rounded-md bg-rose-100 text-rose-800 font-bold text-xs border border-rose-200" th:text="${item.grade}">F</span>
+                                </span>
+                            </td>
+                            <td class="px-4 py-3.5 text-center">
+                                <a th:href="@{/scores/{id}/edit(id=${item.studentScoreId})}"
+                                   title="Chỉnh sửa điểm"
+                                   class="inline-flex items-center justify-center p-1.5 rounded-lg text-slate-400 hover:text-sis-600 hover:bg-sis-50 transition">
+                                    <!-- Pencil Icon as shown in Exam Screenshot -->
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                    </svg>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(scores)}">
+                            <td colspan="9" class="px-6 py-10 text-center text-slate-500">
+                                Chưa có dữ liệu điểm phù hợp. Hãy nhấn <strong>+ Student</strong> để thêm sinh viên hoặc <strong>+ Score</strong> để nhập điểm môn học.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Reference Section: Student Directory & Grade Conversion Table -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Registered Students List -->
+            <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="px-5 py-3.5 bg-slate-100 border-b border-slate-200 flex items-center justify-between">
+                    <h3 class="font-semibold text-slate-700 text-sm">Danh sách Sinh viên đã đăng ký (<span th:text="${#lists.size(students)}">1</span>)</h3>
+                    <a th:href="@{/students/new}" class="text-xs font-semibold text-sis-600 hover:underline">+ Thêm sinh viên mới</a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200 text-xs sm:text-sm">
+                        <thead class="bg-slate-50 text-slate-600">
+                            <tr>
+                                <th class="px-4 py-2.5 text-left font-semibold">ID</th>
+                                <th class="px-4 py-2.5 text-left font-semibold">Student Code</th>
+                                <th class="px-4 py-2.5 text-left font-semibold">Full Name</th>
+                                <th class="px-4 py-2.5 text-left font-semibold">Address</th>
+                                <th class="px-4 py-2.5 text-right font-semibold">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr th:each="st : ${students}" class="hover:bg-slate-50">
+                                <td class="px-4 py-2.5 text-slate-500" th:text="${st.studentId}">1</td>
+                                <td class="px-4 py-2.5 font-semibold text-slate-800" th:text="${st.studentCode}">2007A10</td>
+                                <td class="px-4 py-2.5 text-slate-800" th:text="${st.fullName}">Nguyễn Văn A</td>
+                                <td class="px-4 py-2.5 text-slate-600" th:text="${st.address ?: '—'}">Hà Nội</td>
+                                <td class="px-4 py-2.5 text-right">
+                                    <a th:href="@{/scores/new(studentId=${st.studentId})}"
+                                       class="inline-flex items-center px-2.5 py-1 rounded bg-sis-50 text-sis-600 hover:bg-sis-100 font-medium text-xs transition">
+                                        + Nhập điểm
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Grade Conversion Reference Table (From Exam Paper Page 2) -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="px-5 py-3.5 bg-slate-100 border-b border-slate-200">
+                    <h3 class="font-semibold text-slate-700 text-sm">Bảng quy đổi điểm (Grade Conversion)</h3>
+                </div>
+                <div class="p-4 space-y-3 text-xs sm:text-sm">
+                    <p class="text-slate-600">
+                        Công thức tính điểm học phần:<br>
+                        <strong class="text-slate-800">Grade = 0.3 × Score 1 + 0.7 × Score 2</strong>
+                    </p>
+                    <table class="min-w-full border border-slate-200 rounded-lg overflow-hidden">
+                        <thead class="bg-slate-50 text-slate-700">
+                            <tr>
+                                <th class="px-3 py-2 border-b text-left font-semibold">Score Range</th>
+                                <th class="px-3 py-2 border-b text-center font-semibold">Grade</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200">
+                            <tr>
+                                <td class="px-3 py-2">8.0 to 10.0</td>
+                                <td class="px-3 py-2 text-center font-bold text-emerald-700">A</td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2">6.0 to 7.9</td>
+                                <td class="px-3 py-2 text-center font-bold text-blue-700">B</td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2">4.0 to 5.9</td>
+                                <td class="px-3 py-2 text-center font-bold text-amber-700">D</td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2">less than 4.0</td>
+                                <td class="px-3 py-2 text-center font-bold text-rose-700">F</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
+        Enterprise Application Development in Java EE — SET01 Practical Paper • Student Information System (SIS)
+    </footer>
+
+</body>
+</html>
+

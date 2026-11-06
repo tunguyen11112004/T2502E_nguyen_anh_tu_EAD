@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Student (+ Student) - Student Information System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sis: {
+                            50: '#f4f7f3',
+                            100: '#e4ebe2',
+                            500: '#5a7753',
+                            600: '#4a6444',
+                            700: '#3c5137'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 antialiased flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-sis-500 text-white shadow-md">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 py-5 flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold">Student Information System</h1>
+                <p class="text-sis-100 text-sm">Question 1 — Insert Student from Website (+ Student)</p>
+            </div>
+            <a th:href="@{/}" class="px-3.5 py-2 rounded-lg bg-sis-600 hover:bg-sis-700 text-sm font-medium transition">
+                &larr; Quay lại Danh sách
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Form Card -->
+    <main class="flex-1 max-w-xl w-full mx-auto px-4 sm:px-6 py-10">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="bg-sis-500 px-6 py-4 text-white">
+                <h2 class="text-lg font-bold">Thêm mới Sinh viên (+ Student)</h2>
+                <p class="text-xs text-sis-100 mt-0.5">Nhập thông tin hồ sơ sinh viên vào bảng <code>student_t</code></p>
+            </div>
+
+            <form th:action="@{/students}" th:object="${studentForm}" method="post" class="p-6 space-y-5">
+
+                <!-- Student Code -->
+                <div>
+                    <label for="studentCode" class="block text-sm font-semibold text-slate-700 mb-1">
+                        Student Code (Mã sinh viên) <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="text"
+                           id="studentCode"
+                           th:field="*{studentCode}"
+                           maxlength="20"
+                           placeholder="Ví dụ: 2007A10"
+                           class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-sis-500 focus:border-sis-500"/>
+                    <p th:if="${#fields.hasErrors('studentCode')}"
+                       th:errors="*{studentCode}"
+                       class="mt-1 text-xs text-rose-600 font-medium"></p>
+                </div>
+
+                <!-- Full Name -->
+                <div>
+                    <label for="fullName" class="block text-sm font-semibold text-slate-700 mb-1">
+                        Student Name (Họ và tên) <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="text"
+                           id="fullName"
+                           th:field="*{fullName}"
+                           maxlength="100"
+                           placeholder="Ví dụ: Nguyễn Văn A"
+                           class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-sis-500 focus:border-sis-500"/>
+                    <p th:if="${#fields.hasErrors('fullName')}"
+                       th:errors="*{fullName}"
+                       class="mt-1 text-xs text-rose-600 font-medium"></p>
+                </div>
+
+                <!-- Address -->
+                <div>
+                    <label for="address" class="block text-sm font-semibold text-slate-700 mb-1">
+                        Address (Địa chỉ)
+                    </label>
+                    <input type="text"
+                           id="address"
+                           th:field="*{address}"
+                           maxlength="255"
+                           placeholder="Ví dụ: Hà Nội"
+                           class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-sis-500 focus:border-sis-500"/>
+                    <p th:if="${#fields.hasErrors('address')}"
+                       th:errors="*{address}"
+                       class="mt-1 text-xs text-rose-600 font-medium"></p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="pt-3 flex items-center justify-end gap-3 border-t border-slate-100">
+                    <a th:href="@{/}"
+                       class="px-4 py-2.5 rounded-lg border border-slate-300 hover:bg-slate-100 text-slate-700 text-sm font-medium transition">
+                        Hủy bỏ
+                    </a>
+                    <button type="submit"
+                            class="px-5 py-2.5 rounded-lg bg-sis-500 hover:bg-sis-600 text-white text-sm font-semibold shadow-sm transition">
+                        Lưu Sinh viên
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+</body>
+</html>
+
